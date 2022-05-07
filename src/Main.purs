@@ -3,6 +3,7 @@ module Main where
 import Prelude
 
 import Control.Alt ((<|>))
+import Data.Maybe (maybe)
 import Deku.Attribute (class Attr, Attribute, (:=))
 import Deku.Control (text, text_)
 import Deku.Core (Element)
@@ -10,14 +11,11 @@ import Deku.DOM (Style)
 import Deku.DOM as D
 import Deku.Toplevel (runInBodyA)
 import Effect (Effect)
-import FRP.Behavior (sample)
-import FRP.Behavior.Mouse (position)
 import FRP.Event (Event, makeEvent, subscribe)
 import FRP.Event.AnimationFrame (animationFrame)
 import FRP.Event.Keyboard (down, up)
 import FRP.Event.Mouse (Mouse)
 import FRP.Event.Mouse as Mouse
-import Data.Maybe
 
 type Env =
   { mouse :: Mouse
