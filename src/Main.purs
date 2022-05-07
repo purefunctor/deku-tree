@@ -8,23 +8,23 @@ import Deku.Control (text_)
 import Deku.DOM (Style)
 import Deku.DOM as D
 import Deku.Toplevel (runInBodyA)
+import Effect (Effect)
 import FRP.Event (Event, makeEvent, subscribe)
 import FRP.Event.Keyboard (down, up)
-import Effect (Effect)
 
 main :: Effect Unit
 main = runInBodyA view
   where
   view :: forall lock. _ (_ lock _)
   view =
-    [ D.header_ [ text_ "Deku Tree"]
+    [ D.header_ [ text_ "Deku Tree" ]
     , D.main_
-      [ D.div (keyDownEvent "KeyD" <|> keyUpEvent "KeyD") [ text_ "D"]
-      , D.div (keyDownEvent "KeyF" <|> keyUpEvent "KeyF") [ text_ "F" ]
-      , D.div (keyDownEvent "KeyJ" <|> keyUpEvent "KeyJ") [ text_ "J" ]
-      , D.div (keyDownEvent "KeyK" <|> keyUpEvent "KeyK") [ text_ "K" ]
-      ]
-    , D.footer_ [ text_ "PureFunctor, 2022 <|> Made with <3 and FRP"]
+        [ D.div (keyDownEvent "KeyD" <|> keyUpEvent "KeyD") [ text_ "D" ]
+        , D.div (keyDownEvent "KeyF" <|> keyUpEvent "KeyF") [ text_ "F" ]
+        , D.div (keyDownEvent "KeyJ" <|> keyUpEvent "KeyJ") [ text_ "J" ]
+        , D.div (keyDownEvent "KeyK" <|> keyUpEvent "KeyK") [ text_ "K" ]
+        ]
+    , D.footer_ [ text_ "PureFunctor, 2022 <|> Made with <3 and FRP" ]
     ]
 
 keyDownEvent :: forall e. Attr e Style String => String -> Event (Attribute e)
