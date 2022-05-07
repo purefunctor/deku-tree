@@ -1,0 +1,11 @@
+{
+    "private": "true",
+    "type": "module",
+    "scripts": {
+        "build": "spago build",
+        "serve": "parcel serve public/index.html"
+    },
+    "devDependencies": {
+        "parcel": "^2.5.0"
+    }
+}
