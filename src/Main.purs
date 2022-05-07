@@ -6,6 +6,7 @@ import Control.Alt ((<|>))
 import Data.Foldable (oneOfMap)
 import Data.Maybe (Maybe(..))
 import Data.Maybe (maybe)
+import Data.String (drop)
 import Data.String.Common (toLower)
 import Deku.Attribute (class Attr, Attribute, cb, (:=))
 import Deku.Control (blank, plant, text, text_)
@@ -14,11 +15,12 @@ import Deku.DOM (Style)
 import Deku.DOM as D
 import Deku.Toplevel (runInBody1)
 import Effect (Effect)
-import Effect.Console (error, log)
+import Effect.Console (error, log, logShow)
 import FRP.Event (Event, bang, makeEvent, subscribe)
 import FRP.Event.VBus (V, vbus)
 import Foreign (Foreign, unsafeToForeign)
 import Partial.Unsafe (unsafeCrashWith)
+import Routing.Hash (setHash, matchesWith)
 import Routing.PushState (LocationState, PushStateInterface, makeInterface)
 import Slug (generate, toString)
 import Type.Prelude (Proxy(..))
@@ -29,25 +31,20 @@ type Evt = V
   )
 
 type Env =
-  { initialPath :: String
-  , pushStateInterface :: PushStateInterface
+  {
   }
 
 main :: Effect Unit
-main = do
-  pushStateInterface <- makeInterface
-  { path: initialPath } <- pushStateInterface.locationState
-  runInBody1 (view { initialPath, pushStateInterface })
+main = runInBody1 (view {})
 
 view :: forall l p. Env -> Event (Domable l p)
-view { initialPath, pushStateInterface } = vbus (Proxy :: Proxy Evt) viewFn
+view _ = vbus (Proxy :: Proxy Evt) viewFn
   where
-  state :: Foreign
-  state = unsafeToForeign {}
+  hashRoute :: Event String
+  hashRoute = makeEvent \k -> matchesWith Just \old new -> do
+    when (old /= Just new) (k new)
 
-  location :: Event LocationState
-  location = makeEvent pushStateInterface.listen
-
+  viewFn :: _ -> _ -> Domable l p
   viewFn _ _ = plant $
     [ D.nav (bang $ D.Class := "sidebar")
         [ D.div (bang $ D.Class := "sidebar-title")
@@ -85,19 +82,15 @@ view { initialPath, pushStateInterface } = vbus (Proxy :: Proxy Evt) viewFn
     where
     titleText = text $ titleText0 <|> titleTextN
       where
-      titleText0 = bang $
-        if initialPath == "/" then
+      titleText0 = bang $ "Deku Tree"
+      titleTextN = hashRoute <#> \current ->
+        if current == "/" || current == "" then
           "Deku Tree"
         else
-          initialPath
-      titleTextN = location <#> \current ->
-        if current.path == "/" then
-          "Deku Tree"
-        else
-          current.path
+          drop 1 current
     titleAnchorClick = cb \e -> do
       preventDefault e
-      pushStateInterface.pushState state "/"
+      setHash "/"
     itemAnchorClick item = cb \e -> do
       preventDefault e
-      pushStateInterface.pushState state item
+      setHash $ "/" <> item
