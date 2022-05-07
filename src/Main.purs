@@ -18,27 +18,23 @@ main = runInBodyA view
   view :: forall lock. _ (_ lock _)
   view =
     [ D.header_ [ text_ "Deku Tree" ]
-    , D.main_
-        [ D.div (keyDownEvent "KeyD" <|> keyUpEvent "KeyD") [ text_ "D" ]
-        , D.div (keyDownEvent "KeyF" <|> keyUpEvent "KeyF") [ text_ "F" ]
-        , D.div (keyDownEvent "KeyJ" <|> keyUpEvent "KeyJ") [ text_ "J" ]
-        , D.div (keyDownEvent "KeyK" <|> keyUpEvent "KeyK") [ text_ "K" ]
-        ]
+    , D.main_ $ [ "D", "F", "J", "K" ] <#> \key ->
+        D.div (keyDownEvent key <|> keyUpEvent key) [ text_ key ]
     , D.footer_ [ text_ "PureFunctor, 2022 <|> Made with <3 and FRP" ]
     ]
 
 keyDownEvent :: forall e. Attr e Style String => String -> Event (Attribute e)
-keyDownEvent keyCode = makeEvent \k ->
-  subscribe down \keyCode' ->
-    if keyCode == keyCode' then
+keyDownEvent key = makeEvent \k ->
+  subscribe down \keyCode ->
+    if "Key" <> key == keyCode then
       k $ D.Style := "background-color: white; color: black;"
     else
       pure unit
 
 keyUpEvent :: forall e. Attr e Style String => String -> Event (Attribute e)
-keyUpEvent keyCode = makeEvent \k ->
-  subscribe up \keyCode' ->
-    if keyCode == keyCode' then
+keyUpEvent key = makeEvent \k ->
+  subscribe up \keyCode ->
+    if "Key" <> key == keyCode then
       k $ D.Style := (mempty :: String)
     else
       pure unit
