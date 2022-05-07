@@ -1,12 +1,10 @@
 { name = "deku-tree"
 , dependencies =
-  [ "console"
-  , "control"
+  [ "control"
   , "deku"
   , "effect"
   , "event"
   , "foldable-traversable"
-  , "foreign"
   , "maybe"
   , "partial"
   , "prelude"
