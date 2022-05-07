@@ -1,65 +1,59 @@
 html {
     font-family: 'Koulen', cursive;
+    color: white;
 }
 
 body {
     display: flex;
     height: 100vh;
     margin: unset;
+    background-color: #1D1F20;
+}
+
+.sidebar {
+    background-color: #27292A;
+    display: flex;
     flex-direction: column;
-    background-color: #343330;
+    width: 18em;
 }
 
-header, footer {
-    flex-grow: 1;
-    margin: 12px;
-    color: white;
+.sidebar-title {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-header {
+    height: 20%;
     font-size: 2em;
+    border-bottom: #1D1F20 solid;
 }
 
-footer {
-    font-size: 1em;
+.sidebar-title > a {
+    color: unset;
+    text-align: center;
+    text-decoration: unset;
+    width: 80%;
+    overflow: clip;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-main {
-    height: 80%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    column-gap: 24px;
+.sidebar-items {
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 
-main > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 128px;
-    width: 128px;
-    color: white;
-    border-radius: 10px;
-    font-size: 1.5em;
-    user-select: none;
-    /* transition: background-color 300ms, color 300ms; */
+.sidebar-items > ul {
+    list-style: square;
 }
 
-main > div:nth-of-type(1) {
-    background-color: #355070;
+.sidebar-items > ul > li {
+    font-size: 18px;
 }
 
-main > div:nth-of-type(2) {
-    background-color: #6D597A;
+.sidebar-items > ul > li > a {
+    color: unset;
+    text-decoration: unset;
 }
 
-main > div:nth-of-type(3) {
-    background-color: #B56576;
-}
-
-main > div:nth-of-type(4) {
-    background-color: #E56B6F;
+.content {
+    flex-grow: 1;
 }

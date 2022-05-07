@@ -3,52 +3,101 @@ module Main where
 import Prelude
 
 import Control.Alt ((<|>))
+import Data.Foldable (oneOfMap)
+import Data.Maybe (Maybe(..))
 import Data.Maybe (maybe)
-import Deku.Attribute (class Attr, Attribute, (:=))
-import Deku.Control (text, text_)
-import Deku.Core (Element)
+import Data.String.Common (toLower)
+import Deku.Attribute (class Attr, Attribute, cb, (:=))
+import Deku.Control (blank, plant, text, text_)
+import Deku.Core (Domable, Element)
 import Deku.DOM (Style)
 import Deku.DOM as D
-import Deku.Toplevel (runInBodyA)
+import Deku.Toplevel (runInBody1)
 import Effect (Effect)
-import FRP.Event (Event, makeEvent, subscribe)
-import FRP.Event.AnimationFrame (animationFrame)
-import FRP.Event.Keyboard (down, up)
-import FRP.Event.Mouse (Mouse)
-import FRP.Event.Mouse as Mouse
+import Effect.Console (error, log)
+import FRP.Event (Event, bang, makeEvent, subscribe)
+import FRP.Event.VBus (V, vbus)
+import Foreign (Foreign, unsafeToForeign)
+import Partial.Unsafe (unsafeCrashWith)
+import Routing.PushState (LocationState, PushStateInterface, makeInterface)
+import Slug (generate, toString)
+import Type.Prelude (Proxy(..))
+import Web.Event.Event (preventDefault)
+
+type Evt = V
+  (
+  )
 
 type Env =
-  { mouse :: Mouse
+  { initialPath :: String
+  , pushStateInterface :: PushStateInterface
   }
 
 main :: Effect Unit
 main = do
-  mouse <- Mouse.getMouse
-  runInBodyA (view { mouse })
+  pushStateInterface <- makeInterface
+  { path: initialPath } <- pushStateInterface.locationState
+  runInBody1 (view { initialPath, pushStateInterface })
 
-view :: forall lock payload. Env -> Array (Element lock payload)
-view { mouse } =
-  [ D.header_ [ text $ mouseMoveEvent mouse ]
-  , D.main_ $ [ "D", "F", "J", "K" ] <#> \key ->
-      D.div (keyDownEvent key <|> keyUpEvent key) [ text_ key ]
-  , D.footer_ [ text_ "PureFunctor, 2022 <|> Made with <3 and FRP" ]
-  ]
+view :: forall l p. Env -> Event (Domable l p)
+view { initialPath, pushStateInterface } = vbus (Proxy :: Proxy Evt) viewFn
+  where
+  state :: Foreign
+  state = unsafeToForeign {}
 
-keyDownEvent :: forall e. Attr e Style String => String -> Event (Attribute e)
-keyDownEvent key = makeEvent \k ->
-  subscribe down \keyCode ->
-    if "Key" <> key == keyCode then
-      k $ D.Style := "background-color: white; color: black;"
-    else
-      pure unit
+  location :: Event LocationState
+  location = makeEvent pushStateInterface.listen
 
-keyUpEvent :: forall e. Attr e Style String => String -> Event (Attribute e)
-keyUpEvent key = makeEvent \k ->
-  subscribe up \keyCode ->
-    if "Key" <> key == keyCode then
-      k $ D.Style := (mempty :: String)
-    else
-      pure unit
-
-mouseMoveEvent :: Mouse -> Event String
-mouseMoveEvent mouse = Mouse.withPosition mouse animationFrame <#> _.pos >>> maybe "No Mouse!" show
+  viewFn _ _ = plant $
+    [ D.nav (bang $ D.Class := "sidebar")
+        [ D.div (bang $ D.Class := "sidebar-title")
+            [ D.a
+                ( oneOfMap bang
+                    [ D.Href := "/"
+                    , D.OnClick := titleAnchorClick
+                    ]
+                )
+                [ titleText
+                ]
+            ]
+        , D.div (bang $ D.Class := "sidebar-items")
+            [ D.ul_ $ [ "Keyboard and Mouse, and a very, very long title", "Mouse" ] <#> \item ->
+                case toString <$> generate item of
+                  Just item' ->
+                    D.li_
+                      [ D.a
+                          ( oneOfMap bang
+                              [ D.Href := item'
+                              , D.OnClick := itemAnchorClick item'
+                              ]
+                          )
+                          [ text_ item
+                          ]
+                      ]
+                  Nothing ->
+                    unsafeCrashWith "Invalid slug."
+            ]
+        ]
+    , D.main (bang $ D.Class := "content")
+        [ titleText
+        ]
+    ]
+    where
+    titleText = text $ titleText0 <|> titleTextN
+      where
+      titleText0 = bang $
+        if initialPath == "/" then
+          "Deku Tree"
+        else
+          initialPath
+      titleTextN = location <#> \current ->
+        if current.path == "/" then
+          "Deku Tree"
+        else
+          current.path
+    titleAnchorClick = cb \e -> do
+      preventDefault e
+      pushStateInterface.pushState state "/"
+    itemAnchorClick item = cb \e -> do
+      preventDefault e
+      pushStateInterface.pushState state item
