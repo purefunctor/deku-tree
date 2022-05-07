@@ -1,11 +1,11 @@
 { name = "deku-tree"
 , dependencies =
   [ "behaviors"
-  , "console"
   , "control"
   , "deku"
   , "effect"
   , "event"
+  , "maybe"
   , "prelude"
   ]
 , packages = ./packages.dhall
