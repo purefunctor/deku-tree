@@ -44,6 +44,7 @@ main > div {
     color: white;
     border-radius: 10px;
     font-size: 1.5em;
+    user-select: none;
     /* transition: background-color 300ms, color 300ms; */
 }
 
