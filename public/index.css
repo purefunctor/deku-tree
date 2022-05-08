@@ -34,7 +34,7 @@ article {
     height: 100vh;
     position: sticky;
     top: 0px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .sidebar-title {
