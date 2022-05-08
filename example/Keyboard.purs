@@ -15,8 +15,8 @@ view :: forall lock payload. Domable lock payload
 view = plant $
   D.div (bang $ D.Class := "keyboard-container")
     [ D.h2_
-      [ text_ "Try hitting the following keys on your keyboard:"
-      ]
+        [ text_ "Try hitting the following keys on your keyboard:"
+        ]
     , D.hr_ blank
     , D.section (bang $ D.Class := "keyboard-container-row")
         [ D.div (keyDownEvent "KeyS" <|> keyUpEvent "KeyS") [ text_ "S" ]
