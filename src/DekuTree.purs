@@ -62,7 +62,7 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
             ]
         , D.div (bang $ D.Class := "sidebar-items") sidebarItems
         ]
-    , D.main (bang $ D.Class := "content") contentDomable
+    , D.main (bang $ D.Class := "content-head") contentDomable
     ]
     where
     titleText = text $ titleText0 <|> titleTextN
@@ -79,13 +79,15 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
               "Not Found"
     contentDomable = flip switcher hashRoute \current ->
       if current == "/" || current == "" then
-        D.div_ [ text_ "Deku Tree" ]
+        D.div cls [ text_ "Deku Tree" ]
       else
         case Map.lookup (drop 1 current) sticks of
           Just (_ /\ v) ->
-            D.div_ v
+            D.div cls v
           Nothing ->
-            D.div_ [ text_ "Not Found" ]
+            D.div cls [ text_ "Not Found" ]
+      where
+      cls = bang $ D.Class := "content-body"
     sidebarItems = plant $ D.ul_ $ foldlWithIndex go [] sticks
       where
       go i a (k /\ _) = a <>

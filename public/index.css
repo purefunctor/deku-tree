@@ -54,6 +54,6 @@ body {
     text-decoration: unset;
 }
 
-.content {
+.content-head {
     flex-grow: 1;
 }
