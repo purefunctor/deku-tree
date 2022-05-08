@@ -8,6 +8,7 @@
   , "maybe"
   , "ordered-collections"
   , "prelude"
+  , "refs"
   , "routing"
   , "slug"
   , "strings"
