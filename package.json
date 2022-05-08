@@ -2,8 +2,12 @@
     "private": "true",
     "type": "module",
     "scripts": {
+        "postinstall": "spago install",
         "build": "spago build",
-        "serve": "parcel serve public/index.html"
+        "example": "spago -x example/spago.dhall build",
+        "serve": "pnpm example && parcel serve public/index.html",
+        "bundle": "pnpm example && parcel build public/index.html",
+        "clean": "rm -rf node_modules dist output generated-docs .spago .parcel-cache"
     },
     "devDependencies": {
         "parcel": "^2.5.0"
