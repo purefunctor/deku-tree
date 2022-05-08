@@ -6,11 +6,12 @@
   , "event"
   , "foldable-traversable"
   , "maybe"
-  , "partial"
+  , "ordered-collections"
   , "prelude"
   , "routing"
   , "slug"
   , "strings"
+  , "tuples"
   , "typelevel-prelude"
   , "web-events"
   ]
