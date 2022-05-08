@@ -2,9 +2,9 @@
 , dependencies =
   [ "control"
   , "deku"
-  , "effect"
   , "event"
   , "foldable-traversable"
+  , "lists"
   , "maybe"
   , "ordered-collections"
   , "prelude"

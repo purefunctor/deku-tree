@@ -5,6 +5,8 @@ import Prelude
 import Control.Alt ((<|>))
 import Data.Foldable (class Foldable, foldl, oneOfMap)
 import Data.FoldableWithIndex (foldlWithIndex)
+import Data.List (List(..))
+import Data.List as List
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
@@ -21,18 +23,18 @@ import Slug as Slug
 import Type.Prelude (Proxy(..))
 import Web.Event.Event (preventDefault)
 
-type Sticks l p = Map String (String /\ Domable l p)
+type Sticks l p = List (String /\ String /\ Domable l p)
 
 sticksFromFoldable
   :: forall f l p
    . Foldable f
   => f (String /\ Domable l p)
   -> Sticks l p
-sticksFromFoldable = foldl go Map.empty
+sticksFromFoldable = foldl go Nil
   where
   go a (k /\ v) = case Slug.generate k of
     Just k' ->
-      Map.insert (Slug.toString k') (k /\ v) a
+      Cons (Slug.toString k' /\ k /\ v) a
     Nothing ->
       a
 
@@ -41,6 +43,9 @@ type DekuTreeEvents = V ( )
 makeDekuTree :: forall l p. Sticks l p -> Domable l p
 makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
   where
+  sticks' :: Map String (String /\ Domable l p)
+  sticks' = Map.fromFoldable sticks
+
   hashRoute :: Event String
   hashRoute = makeEvent \k -> matchesWith Just \old new -> do
     when (old /= Just new) (k new)
@@ -72,7 +77,7 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
         if current == "/" || current == "" then
           "Deku Tree"
         else
-          case Map.lookup (drop 1 current) sticks of
+          case Map.lookup (drop 1 current) sticks' of
             Just (k /\ _) ->
               k
             Nothing ->
@@ -81,17 +86,19 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
       if current == "/" || current == "" then
         D.div cls [ text_ "Deku Tree" ]
       else
-        case Map.lookup (drop 1 current) sticks of
+        case Map.lookup (drop 1 current) sticks' of
           Just (_ /\ v) ->
             D.div cls v
           Nothing ->
             D.div cls [ text_ "Not Found" ]
       where
       cls = bang $ D.Class := "content-body"
-    sidebarItems = plant $ D.ul_ $ foldlWithIndex go [] sticks
+    sidebarItems = plant $ D.ul_ $ fx $ foldlWithIndex go Nil sticks'
       where
-      go i a (k /\ _) = a <>
-        [ D.li_
+      fx :: forall a. List a -> Array a
+      fx = List.toUnfoldable <<< List.reverse
+      go i a (k /\ _) = flip Cons a $
+        D.li_
           [ D.a
               ( oneOfMap bang
                   [ D.Href := i
@@ -103,4 +110,3 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
             [ text_ k
             ]
           ]
-        ]
