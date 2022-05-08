@@ -10,6 +10,14 @@ body {
     background-color: #1D1F20;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-weight: unset;
+}
+
+hr {
+    border: #27292A 1px solid;
+}
+
 .sidebar {
     background-color: #27292A;
     display: flex;
@@ -56,4 +64,20 @@ body {
 
 .content-head {
     flex-grow: 1;
+}
+
+.keyboard-container {
+    margin: 1em;
+}
+
+.keyboard-container-row {
+    display: flex;
+}
+
+.keyboard-container-row > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4em;
+    height: 4em;
 }
