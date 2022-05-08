@@ -13,7 +13,7 @@ import Data.Maybe (Maybe(..))
 import Data.String (drop)
 import Data.Tuple.Nested (type (/\), (/\))
 import Deku.Attribute (cb, (:=))
-import Deku.Control (plant, switcher, text, text_)
+import Deku.Control (blank, plant, switcher, text, text_)
 import Deku.Core (Domable)
 import Deku.DOM as D
 import FRP.Event (Event, bang, makeEvent)
@@ -53,21 +53,22 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
   viewFn :: _ -> _ -> Domable l p
   viewFn _ _ = plant $
     [ D.nav (bang $ D.Class := "sidebar")
-        [ D.div (bang $ D.Class := "sidebar-title")
-            [ D.a
-                ( oneOfMap bang
-                    [ D.Href := "/"
-                    , D.OnClick := cb \e -> do
-                        preventDefault e
-                        setHash "/"
-                    ]
-                )
-                [ titleText
-                ]
+      [ D.div (bang $ D.Class := "sidebar-title")
+        [ D.a
+          ( oneOfMap bang
+            [ D.Href := "/"
+            , D.OnClick := cb \e -> do
+                preventDefault e
+                setHash "/"
             ]
-        , D.div (bang $ D.Class := "sidebar-items") sidebarItems
+          )
+          [ titleText
+          ]
         ]
+      , D.div (bang $ D.Class := "sidebar-items") sidebarItems
+      ]
     , D.main (bang $ D.Class := "content-head") contentDomable
+    , D.div (bang $ D.Class := "right-padding") blank
     ]
     where
     titleText = text $ titleText0 <|> titleTextN
@@ -84,7 +85,7 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
               "Not Found"
     contentDomable = flip switcher hashRoute \current ->
       if current == "/" || current == "" then
-        D.div cls [ text_ "Deku Tree" ]
+        D.div cls landingView
       else
         case Map.lookup (drop 1 current) sticks' of
           Just (_ /\ v) ->
@@ -110,3 +111,15 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
             [ text_ k
             ]
           ]
+
+  landingView = plant $
+    [ D.h2_
+        [ text_ "Welcome to Deku Tree."
+        ]
+    , D.hr_ blank
+    , D.article_
+        [ text_ "A collection of FRP-based, interactive, mini web applications. "
+        , text_ "To get started, click on any of the entries on the left-hand side "
+        , text_ "of this web page. Have fun exploring!"
+        ]
+    ]
