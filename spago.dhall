@@ -2,6 +2,7 @@
 , dependencies =
   [ "control"
   , "deku"
+  , "effect"
   , "event"
   , "foldable-traversable"
   , "lists"
@@ -12,7 +13,6 @@
   , "slug"
   , "strings"
   , "tuples"
-  , "typelevel-prelude"
   , "web-events"
   ]
 , packages = ./packages.dhall

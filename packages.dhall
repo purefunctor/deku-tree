@@ -15,7 +15,7 @@ let additions =
           , "now"
           ]
         , repo = "https://github.com/mikesol/purescript-event.git"
-        , version = "v1.6.4"
+        , version = "v1.6.5"
         }
       , variant =
         { dependencies =
@@ -74,24 +74,27 @@ let additions =
         }
       , deku =
         { dependencies =
-          [ "avar"
+          [ "arrays"
           , "control"
           , "effect"
-          , "either"
           , "event"
           , "exceptions"
+          , "fast-vect"
           , "filterable"
           , "foldable-traversable"
           , "foreign-object"
+          , "heterogeneous"
           , "maybe"
           , "newtype"
+          , "ordered-collections"
           , "prelude"
           , "profunctor"
-          , "random"
+          , "quickcheck"
           , "record"
           , "refs"
           , "safe-coerce"
-          , "sized-vectors"
+          , "st"
+          , "transformers"
           , "tuples"
           , "type-equality"
           , "unsafe-coerce"
@@ -100,7 +103,7 @@ let additions =
           , "web-html"
           ]
         , repo = "https://github.com/mikesol/purescript-deku.git"
-        , version = "v0.3.8"
+        , version = "v0.4.0"
         }
       , monoid-extras =
         { dependencies = [ "profunctor-lenses" ]

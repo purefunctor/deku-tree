@@ -4,20 +4,21 @@ import Prelude
 
 import Control.Alt ((<|>))
 import Deku.Attribute (class Attr, Attribute, (:=))
-import Deku.Control (blank, plant, text, text_)
+import Deku.Control (text, text_)
 import Deku.Core (Domable)
 import Deku.DOM (Style)
 import Deku.DOM as D
+import Effect (Effect)
 import Effect.Ref as Ref
 import FRP.Event (Event, bang, makeEvent, subscribe)
 import FRP.Event.Keyboard (down, up)
 
-view :: forall lock payload. Domable lock payload
-view = plant $
+view :: forall lock payload. Domable Effect lock payload
+view = D.div_
   [ D.h2_
       [ text_ "Try hitting the following keys on your keyboard:"
       ]
-  , D.hr_ blank
+  , D.hr_ []
   , D.section (bang $ D.Class := "keyboard-container-row")
       [ D.div (keyStyle "KeyS") [ text_ "S" ]
       , D.div (keyStyle "KeyD") [ text_ "D" ]
@@ -27,7 +28,7 @@ view = plant $
       , D.div (keyStyle "KeyK") [ text_ "K" ]
       , D.div (keyStyle "KeyL") [ text_ "L" ]
       ]
-  , D.hr_ blank
+  , D.hr_ []
   , D.section (bang $ D.Class := "keyboard-container-row")
       [ D.div_ [ text $ ctrState "KeyS" <#> show ]
       , D.div_ [ text $ ctrState "KeyD" <#> show ]
@@ -37,7 +38,7 @@ view = plant $
       , D.div_ [ text $ ctrState "KeyK" <#> show ]
       , D.div_ [ text $ ctrState "KeyL" <#> show ]
       ]
-  , D.hr_ blank
+  , D.hr_ []
   ]
   where
   keyStyle :: forall e. Attr e Style String => String -> Event (Attribute e)

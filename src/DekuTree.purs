@@ -13,22 +13,21 @@ import Data.Maybe (Maybe(..))
 import Data.String (drop)
 import Data.Tuple.Nested (type (/\), (/\))
 import Deku.Attribute (cb, (:=))
-import Deku.Control (blank, plant, switcher, text, text_)
+import Deku.Control (switcher, text, text_)
 import Deku.Core (Domable)
 import Deku.DOM as D
+import Effect (Effect)
 import FRP.Event (Event, bang, makeEvent)
-import FRP.Event.VBus (V, vbus)
 import Routing.Hash (matchesWith, setHash)
 import Slug as Slug
-import Type.Prelude (Proxy(..))
 import Web.Event.Event (preventDefault)
 
-type Sticks l p = List (String /\ String /\ Domable l p)
+type Sticks l p = List (String /\ String /\ Domable Effect l p)
 
 sticksFromFoldable
   :: forall f l p
    . Foldable f
-  => f (String /\ Domable l p)
+  => f (String /\ Domable Effect l p)
   -> Sticks l p
 sticksFromFoldable = foldl go Nil
   where
@@ -38,20 +37,18 @@ sticksFromFoldable = foldl go Nil
     Nothing ->
       a
 
-type DekuTreeEvents = V ( )
-
-makeDekuTree :: forall l p. Sticks l p -> Domable l p
-makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
+makeDekuTree :: forall l p. Sticks l p -> Array (Domable Effect l p)
+makeDekuTree sticks = view
   where
-  sticks' :: Map String (String /\ Domable l p)
+  sticks' :: Map String (String /\ Domable Effect l p)
   sticks' = Map.fromFoldable sticks
 
   hashRoute :: Event String
   hashRoute = makeEvent \k -> matchesWith Just \old new -> do
     when (old /= Just new) (k new)
 
-  viewFn :: _ -> _ -> Domable l p
-  viewFn _ _ = plant $
+  view :: Array (Domable Effect l p)
+  view =
     [ D.nav (bang $ D.Class := "sidebar")
       [ D.div (bang $ D.Class := "sidebar-title")
         [ D.a
@@ -65,10 +62,16 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
           [ titleText
           ]
         ]
-      , D.div (bang $ D.Class := "sidebar-items") sidebarItems
+      , D.div (bang $ D.Class := "sidebar-items")
+          [ sidebarItems
+          ]
       ]
-    , D.main (bang $ D.Class := "content-head") contentDomable
-    , D.div (bang $ D.Class := "right-padding") blank
+    , D.main (bang $ D.Class := "content-head")
+        [ contentDomable
+        ]
+    , D.div (bang $ D.Class := "right-padding")
+        [
+        ]
     ]
     where
     titleText = text $ titleText0 <|> titleTextN
@@ -89,12 +92,12 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
       else
         case Map.lookup (drop 1 current) sticks' of
           Just (_ /\ v) ->
-            D.div cls v
+            D.div cls [ v ]
           Nothing ->
             D.div cls [ text_ "Not Found" ]
       where
       cls = bang $ D.Class := "content-body"
-    sidebarItems = plant $ D.ul_ $ fx $ foldlWithIndex go Nil sticks'
+    sidebarItems = D.ul_ $ fx $ foldlWithIndex go Nil sticks'
       where
       fx :: forall a. List a -> Array a
       fx = List.toUnfoldable <<< List.reverse
@@ -112,11 +115,11 @@ makeDekuTree sticks = plant $ vbus (Proxy :: Proxy DekuTreeEvents) viewFn
             ]
           ]
 
-  landingView = plant $
+  landingView =
     [ D.h2_
         [ text_ "Welcome to Deku Tree."
         ]
-    , D.hr_ blank
+    , D.hr_ []
     , D.article_
         [ text_ "A collection of FRP-based, interactive, mini web applications. "
         , text_ "To get started, click on any of the entries on the left-hand side "
