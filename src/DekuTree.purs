@@ -3,6 +3,7 @@ module DekuTree where
 import Prelude
 
 import Control.Alt ((<|>))
+import Control.Monad.ST.Class (class MonadST)
 import Data.Foldable (class Foldable, foldl, oneOfMap)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.List (List(..))
@@ -17,18 +18,19 @@ import Deku.Control (switcher, text, text_)
 import Deku.Core (Domable)
 import Deku.DOM as D
 import Effect (Effect)
-import FRP.Event (Event, bang, makeEvent)
+import FRP.Event (AnEvent, FromEvent, bang, fromEvent, makeEvent)
 import Routing.Hash (matchesWith, setHash)
 import Slug as Slug
 import Web.Event.Event (preventDefault)
 
-type Sticks l p = List (String /\ String /\ Domable Effect l p)
+type Sticks m l p = List (String /\ String /\ Domable m l p)
 
 sticksFromFoldable
-  :: forall f l p
+  :: forall s m f l p
    . Foldable f
-  => f (String /\ Domable Effect l p)
-  -> Sticks l p
+  => MonadST s m
+  => f (String /\ Domable m l p)
+  -> Sticks m l p
 sticksFromFoldable = foldl go Nil
   where
   go a (k /\ v) = case Slug.generate k of
@@ -37,35 +39,35 @@ sticksFromFoldable = foldl go Nil
     Nothing ->
       a
 
-makeDekuTree :: forall l p. Sticks l p -> Array (Domable Effect l p)
+makeDekuTree :: forall s m l p. FromEvent m (MonadST s m => Sticks m l p -> Array (Domable m l p))
 makeDekuTree sticks = view
   where
-  sticks' :: Map String (String /\ Domable Effect l p)
+  sticks' :: Map String (String /\ Domable m l p)
   sticks' = Map.fromFoldable sticks
 
-  hashRoute :: Event String
-  hashRoute = makeEvent \k -> matchesWith Just \old new -> do
+  hashRoute :: AnEvent m String
+  hashRoute = fromEvent $ makeEvent \k -> matchesWith Just \old new -> do
     when (old /= Just new) (k new)
 
-  view :: Array (Domable Effect l p)
+  view :: Array (Domable m l p)
   view =
     [ D.nav (bang $ D.Class := "sidebar")
-      [ D.div (bang $ D.Class := "sidebar-title")
-        [ D.a
-          ( oneOfMap bang
-            [ D.Href := "/"
-            , D.OnClick := cb \e -> do
-                preventDefault e
-                setHash "/"
+        [ D.div (bang $ D.Class := "sidebar-title")
+            [ D.a
+                ( oneOfMap bang
+                    [ D.Href := "/"
+                    , D.OnClick := cb \e -> do
+                        preventDefault e
+                        setHash "/"
+                    ]
+                )
+                [ titleText
+                ]
             ]
-          )
-          [ titleText
-          ]
+        , D.div (bang $ D.Class := "sidebar-items")
+            [ sidebarItems
+            ]
         ]
-      , D.div (bang $ D.Class := "sidebar-items")
-          [ sidebarItems
-          ]
-      ]
     , D.main (bang $ D.Class := "content-head")
         [ contentDomable
         ]
@@ -111,8 +113,8 @@ makeDekuTree sticks = view
                       setHash $ "/" <> i
                   ]
               )
-            [ text_ k
-            ]
+              [ text_ k
+              ]
           ]
 
   landingView =
