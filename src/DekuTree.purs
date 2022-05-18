@@ -17,7 +17,6 @@ import Deku.Attribute (cb, (:=))
 import Deku.Control (switcher, text, text_)
 import Deku.Core (Domable)
 import Deku.DOM as D
-import Effect (Effect)
 import FRP.Event (AnEvent, FromEvent, bang, fromEvent, makeEvent)
 import Routing.Hash (matchesWith, setHash)
 import Slug as Slug

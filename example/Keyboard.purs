@@ -3,17 +3,17 @@ module Example.Keyboard where
 import Prelude
 
 import Control.Alt ((<|>))
+import Control.Monad.ST.Class (class MonadST)
 import Deku.Attribute (class Attr, Attribute, (:=))
 import Deku.Control (text, text_)
 import Deku.Core (Domable)
 import Deku.DOM (Style)
 import Deku.DOM as D
-import Effect (Effect)
 import Effect.Ref as Ref
-import FRP.Event (Event, bang, makeEvent, subscribe)
+import FRP.Event (AnEvent, FromEvent, bang, fromEvent, makeEvent, subscribe)
 import FRP.Event.Keyboard (down, up)
 
-view :: forall lock payload. Domable Effect lock payload
+view :: forall s m lock payload. MonadST s m => FromEvent m (Domable m lock payload)
 view = D.div_
   [ D.h2_
       [ text_ "Try hitting the following keys on your keyboard:"
@@ -41,8 +41,8 @@ view = D.div_
   , D.hr_ []
   ]
   where
-  keyStyle :: forall e. Attr e Style String => String -> Event (Attribute e)
-  keyStyle keyCode = makeEvent \k -> do
+  keyStyle :: forall e. Attr e Style String => String -> AnEvent m (Attribute e)
+  keyStyle keyCode = fromEvent $ makeEvent \k -> do
     downC <- subscribe down \keyCode' ->
       when (keyCode == keyCode')
         $ k
@@ -55,8 +55,8 @@ view = D.div_
       downC
       upC
 
-  ctrState :: String -> Event Int
-  ctrState keyCode = bang 0 <|> increment
+  ctrState :: String -> AnEvent m Int
+  ctrState keyCode = fromEvent (bang 0 <|> increment)
     where
     increment = makeEvent \k -> do
       current <- Ref.new 1

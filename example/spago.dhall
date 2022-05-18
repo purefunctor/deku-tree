@@ -2,6 +2,6 @@ let toplevel = ../spago.dhall
 
 in      toplevel
     //  { dependencies =
-            toplevel.dependencies # [ "behaviors", "effect", "refs" ]
+            toplevel.dependencies # [ "behaviors", "console", "effect", "refs", "st" ]
         , sources = toplevel.sources # [ "example/*.purs" ]
         }
