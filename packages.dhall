@@ -15,7 +15,7 @@ let additions =
           , "now"
           ]
         , repo = "https://github.com/mikesol/purescript-event.git"
-        , version = "v1.6.5"
+        , version = "v1.6.6"
         }
       , variant =
         { dependencies =
@@ -75,6 +75,7 @@ let additions =
       , deku =
         { dependencies =
           [ "arrays"
+          , "bolson"
           , "control"
           , "effect"
           , "event"
@@ -103,13 +104,18 @@ let additions =
           , "web-html"
           ]
         , repo = "https://github.com/mikesol/purescript-deku.git"
-        , version = "v0.4.0"
+        , version = "v0.4.2"
         }
       , monoid-extras =
         { dependencies = [ "profunctor-lenses" ]
         , repo = "https://github.com/mikesol/purescript-monoid-extras.git"
         , version = "v0.0.1"
         }
+      , bolson =
+        { dependencies = [ "prelude" ]
+        , repo = "https://github.com/mikesol/purescript-bolson.git"
+        , version = "v0.0.2"
+        } 
       }
 
 in  upstream // additions
