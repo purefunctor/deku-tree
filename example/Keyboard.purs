@@ -6,14 +6,14 @@ import Control.Alt ((<|>))
 import Control.Monad.ST.Class (class MonadST)
 import Deku.Attribute (class Attr, Attribute, (:=))
 import Deku.Control (text, text_)
-import Deku.Core (Domable)
+import Deku.Core (class Korok, Domable)
 import Deku.DOM (Style)
 import Deku.DOM as D
 import Effect.Ref as Ref
-import FRP.Event (AnEvent, FromEvent, bang, fromEvent, makeEvent, subscribe)
+import FRP.Event (AnEvent, bang, fromEvent, makeEvent, subscribe)
 import FRP.Event.Keyboard (down, up)
 
-view :: forall s m lock payload. MonadST s m => FromEvent m (Domable m lock payload)
+view :: forall s m lock payload. Korok s m => Domable m lock payload
 view = D.div_
   [ D.h2_
       [ text_ "Try hitting the following keys on your keyboard:"

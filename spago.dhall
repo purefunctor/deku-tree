@@ -2,7 +2,6 @@
 , dependencies =
   [ "control"
   , "deku"
-  , "effect"
   , "event"
   , "foldable-traversable"
   , "lists"

@@ -104,7 +104,7 @@ let additions =
           , "web-html"
           ]
         , repo = "https://github.com/mikesol/purescript-deku.git"
-        , version = "v0.4.2"
+        , version = "v0.4.3"
         }
       , monoid-extras =
         { dependencies = [ "profunctor-lenses" ]

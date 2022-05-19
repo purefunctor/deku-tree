@@ -3,7 +3,6 @@ module DekuTree where
 import Prelude
 
 import Control.Alt ((<|>))
-import Control.Monad.ST.Class (class MonadST)
 import Data.Foldable (class Foldable, foldl, oneOfMap)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.List (List(..))
@@ -15,9 +14,9 @@ import Data.String (drop)
 import Data.Tuple.Nested (type (/\), (/\))
 import Deku.Attribute (cb, (:=))
 import Deku.Control (switcher, text, text_)
-import Deku.Core (Domable)
+import Deku.Core (class Korok, Domable)
 import Deku.DOM as D
-import FRP.Event (AnEvent, FromEvent, bang, fromEvent, makeEvent)
+import FRP.Event (AnEvent, bang, fromEvent, makeEvent)
 import Routing.Hash (matchesWith, setHash)
 import Slug as Slug
 import Web.Event.Event (preventDefault)
@@ -27,7 +26,7 @@ type Sticks m l p = List (String /\ String /\ Domable m l p)
 sticksFromFoldable
   :: forall s m f l p
    . Foldable f
-  => MonadST s m
+  => Korok s m
   => f (String /\ Domable m l p)
   -> Sticks m l p
 sticksFromFoldable = foldl go Nil
@@ -38,7 +37,7 @@ sticksFromFoldable = foldl go Nil
     Nothing ->
       a
 
-makeDekuTree :: forall s m l p. FromEvent m (MonadST s m => Sticks m l p -> Array (Domable m l p))
+makeDekuTree :: forall s m l p. Korok s m => Sticks m l p -> Array (Domable m l p)
 makeDekuTree sticks = view
   where
   sticks' :: Map String (String /\ Domable m l p)
