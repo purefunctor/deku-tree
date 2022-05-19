@@ -3,7 +3,6 @@ module Example.Keyboard where
 import Prelude
 
 import Control.Alt ((<|>))
-import Control.Monad.ST.Class (class MonadST)
 import Deku.Attribute (class Attr, Attribute, (:=))
 import Deku.Control (text, text_)
 import Deku.Core (class Korok, Domable)
