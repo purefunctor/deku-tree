@@ -6,7 +6,9 @@ import App (app)
 import Data.Foldable (fold)
 import Deku.Toplevel (Template(..), runSSR)
 import Effect (Effect)
-import Effect.Class.Console (log)
+import Effect.Aff (launchAff_)
+import Node.FS.Aff (writeTextFile)
+import Node.Encoding (Encoding(..))
 
 head :: String
 head = fold
@@ -26,7 +28,10 @@ head = fold
   ]
 
 tail :: String
-tail = "</html>"
+tail = "</html>\n"
 
 main :: Effect Unit
-main = runSSR (Template { head, tail }) app >>= log
+main = do
+  text <- runSSR (Template { head, tail }) app
+  launchAff_ $
+    writeTextFile UTF8 "./public/index.html" text

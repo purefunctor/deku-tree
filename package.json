@@ -5,8 +5,9 @@
         "postinstall": "spago install",
         "build": "spago build",
         "example": "spago -x example/spago.dhall build",
-        "serve": "pnpm example && parcel serve public/index.html",
-        "bundle": "pnpm example && parcel build public/index.html",
+        "ssr": "spago -x example/spago.dhall run -m Build",
+        "serve": "rm -rf dist && pnpm ssr && parcel serve public/index.html",
+        "bundle": "rm -rf dist && pnpm ssr && parcel build public/index.html",
         "clean": "rm -rf node_modules dist output generated-docs .spago .parcel-cache"
     },
     "devDependencies": {
