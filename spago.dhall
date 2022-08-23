@@ -2,8 +2,8 @@
 , dependencies =
   [ "control"
   , "deku"
-  , "event"
   , "foldable-traversable"
+  , "hyrule"
   , "lists"
   , "maybe"
   , "ordered-collections"

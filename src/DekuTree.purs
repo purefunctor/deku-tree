@@ -13,22 +13,21 @@ import Data.Maybe (Maybe(..))
 import Data.String (drop)
 import Data.Tuple.Nested (type (/\), (/\))
 import Deku.Attribute (cb, (:=))
-import Deku.Control (switcher, text, text_)
-import Deku.Core (class Korok, Domable)
+import Deku.Control (switcher_, text, text_)
+import Deku.Core (Domable)
 import Deku.DOM as D
-import FRP.Event (AnEvent, bang, fromEvent, makeEvent)
+import FRP.Event (ZoraEvent, fromEvent, makeEvent)
 import Routing.Hash (matchesWith, setHash)
 import Slug as Slug
 import Web.Event.Event (preventDefault)
 
-type Sticks m l p = List (String /\ String /\ Domable m l p)
+type Sticks l p = List (String /\ String /\ Domable l p)
 
 sticksFromFoldable
-  :: forall s m f l p
+  :: forall f l p
    . Foldable f
-  => Korok s m
-  => f (String /\ Domable m l p)
-  -> Sticks m l p
+  => f (String /\ Domable l p)
+  -> Sticks l p
 sticksFromFoldable = foldl go Nil
   where
   go a (k /\ v) = case Slug.generate k of
@@ -37,22 +36,22 @@ sticksFromFoldable = foldl go Nil
     Nothing ->
       a
 
-makeDekuTree :: forall s m l p. Korok s m => Sticks m l p -> Array (Domable m l p)
+makeDekuTree :: forall l p. Sticks l p -> Array (Domable l p)
 makeDekuTree sticks = view
   where
-  sticks' :: Map String (String /\ Domable m l p)
+  sticks' :: Map String (String /\ Domable l p)
   sticks' = Map.fromFoldable sticks
 
-  hashRoute :: AnEvent m String
+  hashRoute :: ZoraEvent String
   hashRoute = fromEvent $ makeEvent \k -> matchesWith Just \old new -> do
     when (old /= Just new) (k new)
 
-  view :: Array (Domable m l p)
+  view :: Array (Domable l p)
   view =
-    [ D.nav (bang $ D.Class := "sidebar")
-        [ D.div (bang $ D.Class := "sidebar-title")
+    [ D.nav (pure $ D.Class := "sidebar")
+        [ D.div (pure $ D.Class := "sidebar-title")
             [ D.a
-                ( oneOfMap bang
+                ( oneOfMap pure
                     [ D.Href := "/"
                     , D.OnClick := cb \e -> do
                         preventDefault e
@@ -62,21 +61,21 @@ makeDekuTree sticks = view
                 [ titleText
                 ]
             ]
-        , D.div (bang $ D.Class := "sidebar-items")
+        , D.div (pure $ D.Class := "sidebar-items")
             [ sidebarItems
             ]
         ]
-    , D.main (bang $ D.Class := "content-head")
+    , D.main (pure $ D.Class := "content-head")
         [ contentDomable
         ]
-    , D.div (bang $ D.Class := "right-padding")
+    , D.div (pure $ D.Class := "right-padding")
         [
         ]
     ]
     where
     titleText = text $ titleText0 <|> titleTextN
       where
-      titleText0 = bang $ "Deku Tree"
+      titleText0 = pure $ "Deku Tree"
       titleTextN = hashRoute <#> \current ->
         if current == "/" || current == "" then
           "Deku Tree"
@@ -86,17 +85,19 @@ makeDekuTree sticks = view
               k
             Nothing ->
               "Not Found"
-    contentDomable = flip switcher hashRoute \current ->
-      if current == "/" || current == "" then
-        D.div cls landingView
-      else
-        case Map.lookup (drop 1 current) sticks' of
-          Just (_ /\ v) ->
-            D.div cls [ v ]
-          Nothing ->
-            D.div cls [ text_ "Not Found" ]
+    contentDomable = switcher_ D.div
+      (\current ->
+        if current == "/" || current == "" then
+          D.div cls landingView
+        else
+          case Map.lookup (drop 1 current) sticks' of
+            Just (_ /\ v) ->
+              D.div cls [ v ]
+            Nothing ->
+              D.div cls [ text_ "Not Found" ]
+      ) hashRoute
       where
-      cls = bang $ D.Class := "content-body"
+      cls = pure $ D.Class := "content-body"
     sidebarItems = D.ul_ $ fx $ foldlWithIndex go Nil sticks'
       where
       fx :: forall a. List a -> Array a
@@ -104,7 +105,7 @@ makeDekuTree sticks = view
       go i a (k /\ _) = flip Cons a $
         D.li_
           [ D.a
-              ( oneOfMap bang
+              ( oneOfMap pure
                   [ D.Href := i
                   , D.OnClick := cb \e -> do
                       preventDefault e

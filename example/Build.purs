@@ -3,12 +3,13 @@ module Build where
 import Prelude
 
 import App (app)
+import Control.Monad.ST.Global (toEffect)
 import Data.Foldable (fold)
 import Deku.Toplevel (Template(..), runSSR)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
-import Node.FS.Aff (writeTextFile)
 import Node.Encoding (Encoding(..))
+import Node.FS.Aff (writeTextFile)
 
 head :: String
 head = fold
@@ -32,6 +33,6 @@ tail = "</html>\n"
 
 main :: Effect Unit
 main = do
-  text <- runSSR (Template { head, tail }) app
+  text <- toEffect $ runSSR (Template { head, tail }) app
   launchAff_ $
     writeTextFile UTF8 "./public/index.html" text

@@ -4,7 +4,6 @@ in      toplevel
     //  { dependencies =
               toplevel.dependencies
             # [ "aff"
-              , "behaviors"
               , "effect"
               , "node-buffer"
               , "node-fs-aff"
